@@ -12,6 +12,16 @@ def create_vector_store(documents: list[Document]) -> FAISS:
         embeddings_model,
     )
 
+def search_documents(
+    vector_store: FAISS,
+    query: str,
+    k: int = 2,
+) -> list[Document]:
+    return vector_store.similarity_search(
+        query,
+        k=k,
+    )
+
 
 if __name__ == "__main__":
     documents = [
@@ -31,4 +41,17 @@ if __name__ == "__main__":
 
     vector_store = create_vector_store(documents)
 
-    print("FAISS vector store created successfully.")
+    query = "How do computers learn from data?"
+
+    results = search_documents(
+        vector_store,
+        query,
+        k=2,
+    )
+
+    print(f"Retrieved {len(results)} documents:\n")
+
+    for index, document in enumerate(results, start=1):
+        print(f"--- Result {index} ---")
+        print(document.page_content)
+        print("Metadata:", document.metadata)
