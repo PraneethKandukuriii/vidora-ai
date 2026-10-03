@@ -12,10 +12,11 @@ def create_vector_store(documents: list[Document]) -> FAISS:
         embeddings_model,
     )
 
+
 def search_documents(
     vector_store: FAISS,
     query: str,
-    k: int = 2,
+    k: int = 3,
 ) -> list[Document]:
     return vector_store.similarity_search(
         query,
@@ -24,34 +25,37 @@ def search_documents(
 
 
 if __name__ == "__main__":
-    documents = [
-        Document(
-            page_content="Machine learning allows computers to learn from data.",
-            metadata={"source": "youtube", "video_id": "demo123"},
-        ),
-        Document(
-            page_content="Neural networks are commonly used in deep learning.",
-            metadata={"source": "youtube", "video_id": "demo123"},
-        ),
-        Document(
-            page_content="Python is widely used for artificial intelligence.",
-            metadata={"source": "youtube", "video_id": "demo123"},
-        ),
-    ]
+    from chunking import split_document
+    from document import create_document
+    from transcript import get_transcript
 
-    vector_store = create_vector_store(documents)
+    video_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-    query = "How do computers learn from data?"
+    transcript = get_transcript(video_url)
+
+    document = create_document(
+        transcript=transcript,
+        video_id="dQw4w9WgXcQ",
+    )
+
+    chunks = split_document(document)
+
+    print(f"Transcript length: {len(transcript)} characters")
+    print(f"Number of chunks: {len(chunks)}")
+
+    vector_store = create_vector_store(chunks)
+
+    query = "What is this video about?"
 
     results = search_documents(
         vector_store,
         query,
-        k=2,
     )
 
-    print(f"Retrieved {len(results)} documents:\n")
+    print(f"\nRetrieved {len(results)} relevant chunks:\n")
 
-    for index, document in enumerate(results, start=1):
+    for index, result in enumerate(results, start=1):
         print(f"--- Result {index} ---")
-        print(document.page_content)
-        print("Metadata:", document.metadata)
+        print(result.page_content[:500])
+        print("Metadata:", result.metadata)
+        print()
