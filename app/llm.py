@@ -14,23 +14,41 @@ def create_llm() -> ChatGoogleGenerativeAI:
     )
 
 
-def generate_answer(context: str, question: str) -> str:
+def generate_response(
+    user_request: str,
+    context: str,
+    conversation_history: str = "",
+) -> str:
     llm = create_llm()
 
     prompt = f"""
-You are a helpful AI assistant answering questions about a YouTube video.
+You are Vidora, an AI assistant that answers questions about a YouTube video.
 
-Use only the context provided below to answer the question.
+Answer the user's request directly using the provided video context.
 
-Context:
+Response rules:
+
+1. Understand what the user is actually asking.
+2. Give the direct answer first.
+3. Match the response length to the question.
+4. Use short paragraphs for explanations.
+5. Use bullet points when listing multiple ideas.
+6. Use examples when they make the explanation clearer.
+7. Do not repeat information unnecessarily.
+8. Do not invent information that isn't supported by the video.
+9. If the video context does not contain the answer, clearly say:
+   "I couldn't find the answer in the video."
+10. If the user asks a follow-up question, use the conversation history
+    to understand what they are referring to.
+
+Conversation history:
+{conversation_history}
+
+Video context:
 {context}
 
-Question:
-{question}
-
-Answer clearly and concisely.
-If the answer cannot be found in the context, say:
-"I couldn't find the answer in the video."
+User request:
+{user_request}
 """
 
     response = llm.invoke(prompt)
@@ -44,12 +62,12 @@ if __name__ == "__main__":
     Neural networks are commonly used in deep learning.
     """
 
-    question = "What is machine learning?"
+    user_request = "What is machine learning?"
 
-    answer = generate_answer(
+    response = generate_response(
+        user_request=user_request,
         context=context,
-        question=question,
     )
 
-    print("\nAnswer:")
-    print(answer)
+    print("\nResponse:")
+    print(response)

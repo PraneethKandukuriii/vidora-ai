@@ -1,7 +1,10 @@
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 
-from embeddings import create_embeddings_model
+try:
+    from .embeddings import create_embeddings_model
+except ImportError:  # pragma: no cover - direct script execution
+    from embeddings import create_embeddings_model
 
 
 def create_vector_store(documents: list[Document]) -> FAISS:
@@ -23,11 +26,26 @@ def search_documents(
         k=k,
     )
 
+def search_documents_with_scores(
+    vector_store: FAISS,
+    query: str,
+    k: int = 3,
+) -> list[tuple[Document, float]]:
+    return vector_store.similarity_search_with_score(
+        query,
+        k=k,
+    )
+
 
 if __name__ == "__main__":
-    from chunking import split_document
-    from document import create_document
-    from transcript import get_transcript
+    try:
+        from .chunking import split_document
+        from .document import create_document
+        from .transcript import get_transcript
+    except ImportError:  # pragma: no cover - direct script execution
+        from chunking import split_document
+        from document import create_document
+        from transcript import get_transcript
 
     video_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
