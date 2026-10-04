@@ -3,6 +3,7 @@ try:
     from .document import create_document
     from .intent import detect_intent
     from .llm import generate_response
+    from .query_rewriter import rewrite_query
     from .retrieval import adaptive_search
     from .transcript import extract_video_id, get_transcript
     from .vector_store import create_vector_store
@@ -11,10 +12,10 @@ except ImportError:  # pragma: no cover - direct script execution
     from document import create_document
     from intent import detect_intent
     from llm import generate_response
+    from query_rewriter import rewrite_query
     from retrieval import adaptive_search
     from transcript import extract_video_id, get_transcript
     from vector_store import create_vector_store
-    
 
 
 def answer_question(
@@ -22,12 +23,18 @@ def answer_question(
     question: str,
     chat_history: list[tuple[str, str]],
 ) -> str:
-    
+
+    search_query = rewrite_query(
+        question=question,
+        chat_history=chat_history,
+    )
+
+    print(f"\nSearch query: {search_query}")
 
     documents = adaptive_search(
-    vector_store=vector_store,
-    query=question,
-)
+        vector_store=vector_store,
+        query=search_query,
+    )
 
     context = "\n\n".join(
         document.page_content
